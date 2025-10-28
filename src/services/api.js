@@ -23,16 +23,29 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Se o erro for 401 (Não Autorizado), o token pode estar expirado ou inválido
-    if (error.response && error.response.status === 401) {
+    // Verifica se é um erro 401 E se a mensagem NÃO é 'Credenciais inválidas.'
+    // A mensagem de token expirado/inválido vem do seu authMiddleware no backend
+    const errorMessage = error.response?.data?.message || ''; // Ajuste se a prop se chamar 'error'
+    
+    if (error.response && error.response.status === 401 && errorMessage === 'Token inválido ou expirado.') {
+      // APENAS se for token inválido/expirado, trata como sessão expirada
       toast.error('Sua sessão expirou. Por favor, faça login novamente.');
-      // Remove o token e força o logout
       localStorage.removeItem('token');
-      
-      // Recarrega a página para redirecionar ao login
-      // O ideal é usar o contexto de autenticação, mas isso funciona de forma global
-      window.location.href = '/login'; 
+      // Adicionamos um pequeno delay para o usuário ver o toast antes do redirect
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1500); // Espera 1.5 segundos
+    } else if (error.response && error.response.status === 401 && errorMessage === 'Token de autenticação não fornecido ou mal formatado.') {
+       // Se não enviou token nenhum, também redireciona
+       toast.error('Você precisa estar logado para acessar esta página.');
+       localStorage.removeItem('token');
+       setTimeout(() => {
+        window.location.href = '/login';
+       }, 1500); 
     }
+    
+    // Para todos os outros erros (incluindo 401 de 'Credenciais inválidas.'),
+    // apenas rejeita a promise para que a função que chamou (ex: login) possa tratar.
     return Promise.reject(error);
   }
 );
