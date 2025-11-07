@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api from '../services/api';
+// REMOVA a linha: import api from '../services/api';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -14,7 +14,9 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Conforme seu backend, os campos são 'name', 'email', 'password'
+      // ** MUDANÇA: Importa a api aqui dentro **
+      const { default: api } = await import('../services/api.js');
+
       await api.post('/auth/register', { name, email, password });
       toast.success('Cadastro realizado com sucesso! Faça seu login.');
       navigate('/login');

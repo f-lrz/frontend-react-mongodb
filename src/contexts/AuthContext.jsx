@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+// REMOVA a linha: import api from '../services/api';
 import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
@@ -8,10 +8,9 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!token);
-  const [loading, setLoading] = useState(true); // Para verificar o token na inicialização
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Efeito para validar o token no carregamento inicial (opcional, mas bom)
   useEffect(() => {
     const tokenSalvo = localStorage.getItem('token');
     if (tokenSalvo) {
@@ -23,6 +22,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      // ** MUDANÇA: Importa a api aqui dentro **
+      const { default: api } = await import('../services/api.js');
+
       const response = await api.post('/auth/login', { email, password });
       const { token } = response.data;
 
@@ -31,7 +33,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
 
       toast.success('Login realizado com sucesso!');
-      navigate('/'); // Redireciona para a área logada
+      navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Erro ao fazer login');
     }
@@ -52,7 +54,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook customizado para facilitar o uso do contexto
 export const useAuth = () => {
   return useContext(AuthContext);
 };

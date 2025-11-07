@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
+// REMOVA a linha: import api from '../services/api';
 import { toast } from 'react-toastify';
 import MovieForm from '../components/MovieForm';
 import MovieItem from '../components/MovieItem';
@@ -9,17 +9,18 @@ const Dashboard = () => {
   const { logout } = useAuth();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [editingMovie, setEditingMovie] = useState(null); // Para saber qual filme estamos editando
+  const [editingMovie, setEditingMovie] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
-  // Filtros
   const [genre, setGenre] = useState('');
-  const [watched, setWatched] = useState(null); // null, true, false
+  const [watched, setWatched] = useState(null);
 
   const fetchMovies = useCallback(async () => {
     setLoading(true);
     try {
-      // Constrói os parâmetros de filtro
+      // ** MUDANÇA: Importa a api aqui dentro **
+      const { default: api } = await import('../services/api.js');
+
       const params = {};
       if (genre) params.genre = genre;
       if (watched !== null) params.watched = watched;
@@ -31,7 +32,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [genre, watched]); // Recarrega quando os filtros mudam
+  }, [genre, watched]);
 
   useEffect(() => {
     fetchMovies();
@@ -39,14 +40,14 @@ const Dashboard = () => {
 
   const handleSaveMovie = async (movieData) => {
     try {
+      // ** MUDANÇA: Importa a api aqui dentro **
+      const { default: api } = await import('../services/api.js');
+
       if (editingMovie) {
-        // Atualização (PATCH para parcial, PUT para completo)
-        // Seu backend usa PATCH
         const response = await api.patch(`/movies/${editingMovie._id}`, movieData);
         toast.success('Filme atualizado com sucesso!');
         setMovies(movies.map((m) => (m._id === editingMovie._id ? response.data : m)));
       } else {
-        // Criação
         const response = await api.post('/movies', movieData);
         toast.success('Filme cadastrado com sucesso!');
         setMovies([...movies, response.data]);
@@ -60,7 +61,9 @@ const Dashboard = () => {
   const handleDeleteMovie = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este filme?')) {
       try {
-        await api.delete(`/movies/${id}`); //
+        // ** MUDANÇA: Importa a api aqui dentro **
+        const { default: api } = await import('../services/api.js');
+        await api.delete(`/movies/${id}`);
         toast.success('Filme deletado com sucesso!');
         setMovies(movies.filter((m) => m._id !== id));
       } catch (error) {
