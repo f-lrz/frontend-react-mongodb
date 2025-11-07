@@ -1,12 +1,13 @@
+// src/mocks/handlers.js
 import { http, HttpResponse } from 'msw';
 
-// Obtém a URL da API do mesmo local que o aplicativo usa
-const VITE_API_URL = import.meta.env.VITE_API_URL;
+// A URL base exata que seu frontend está chamando (do seu .env)
+const API_URL = 'https://backend-express-mongodb-ii.filipe2025.tech/api';
 
 export const handlers = [
-  // 1. Mock para o endpoint de Login (POST /auth/login)
-  // Simula uma resposta de sucesso ao fazer login
-  http.post(`${VITE_API_URL}/auth/login`, async ({ request }) => {
+  // 1. Mock para Login (POST)
+  // Agora ele vai interceptar a URL absoluta correta
+  http.post(`${API_URL}/auth/login`, async ({ request }) => {
     const { email } = await request.json();
 
     // Simula um delay de rede
@@ -19,12 +20,8 @@ export const handlers = [
     });
   }),
 
-  // 2. Mock para o endpoint de Listar Filmes (GET /movies)
-  // Simula uma lista de filmes que seria retornada do backend
-  http.get(`${VITE_API_URL}/movies`, () => {
-    // Simula um delay de rede
-    // await new Promise(res => setTimeout(res, 1000));
-
+  // 2. Mock para Listar Filmes (GET)
+  http.get(`${API_URL}/movies`, () => {
     // Retorna uma lista de filmes mocada
     return HttpResponse.json([
       {
@@ -48,9 +45,8 @@ export const handlers = [
     ]);
   }),
 
-  // Adicione outros handlers aqui (ex: register, create movie, delete movie)
-  // Ex: Mock de Registro
-  http.post(`${VITE_API_URL}/auth/register`, async () => {
+  // 3. Mock de Registro (POST)
+  http.post(`${API_URL}/auth/register`, async () => {
     // Simula um delay de rede
     await new Promise((res) => setTimeout(res, 800));
 
