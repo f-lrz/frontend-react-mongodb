@@ -1,6 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-// REMOVA a linha: import api from '../services/api';
 import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
@@ -22,7 +21,6 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // ** MUDANÇA: Importa a api aqui dentro **
       const { default: api } = await import('../services/api.js');
 
       const response = await api.post('/auth/login', { email, password });
