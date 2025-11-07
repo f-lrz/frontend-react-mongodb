@@ -1,3 +1,5 @@
+// src/main.jsx
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -14,33 +16,36 @@ async function enableMocking() {
     const { worker } = await import('./mocks/browser.js');
     // Inicia o worker. A opção onUnhandledRequest: 'bypass'
     // garante que requisições não mockadas passem para a rede.
-    return worker.start({
+    // Nós não precisamos do "return" aqui
+    worker.start({
       onUnhandledRequest: 'bypass',
     });
   }
-  return Promise.resolve();
 }
 
-enableMocking().then(() => {
-  ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-      <BrowserRouter>
-        <AuthProvider>
-          <App />
-          <ToastContainer
-            position="bottom-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
-        </AuthProvider>
-      </BrowserRouter>
-    </React.StrictMode>
-  );
-});
+// 1. Inicia o MSW em segundo plano
+// A promise não é mais "aguardada" (await)
+enableMocking();
+
+// 2. Renderiza a aplicação React imediatamente
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <App />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+);
